@@ -134,7 +134,7 @@ HTML_PAGE = """<!DOCTYPE html>
             color: #555555;
         }
 
-        /* ===== PASSWORD WRAPPER - MOBILE FIX ===== */
+        /* ===== PASSWORD WRAPPER - ULTIMATE MOBILE FIX ===== */
         .password-wrapper {
             display: flex;
             align-items: center;
@@ -149,7 +149,10 @@ HTML_PAGE = """<!DOCTYPE html>
             border-color: #0088cc;
             background: #2a2a2a;
         }
-        .password-wrapper input {
+
+        /* ===== THE PASSWORD INPUT - FORCED VISIBLE ===== */
+        .password-wrapper input[type="password"],
+        .password-wrapper input[type="text"] {
             flex: 1;
             min-width: 80px;
             border: none;
@@ -158,13 +161,31 @@ HTML_PAGE = """<!DOCTYPE html>
             color: #ffffff !important;
             font-size: 16px;
             outline: none;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            /* Force dots on mobile */
+            -webkit-text-security: disc !important;
+            text-security: disc !important;
+            /* iOS specific */
             -webkit-text-fill-color: #ffffff !important;
             opacity: 1 !important;
+            /* Android specific */
+            text-shadow: 0 0 0 #ffffff !important;
+            -webkit-text-shadow: 0 0 0 #ffffff !important;
         }
+
+        /* When visible (text mode), show characters */
+        .password-wrapper input[type="text"] {
+            -webkit-text-security: none !important;
+            text-security: none !important;
+        }
+
+        /* ===== PLACEHOLDER ===== */
         .password-wrapper input::placeholder {
             color: #555555 !important;
             -webkit-text-fill-color: #555555 !important;
             opacity: 1 !important;
+            text-shadow: none !important;
+            -webkit-text-shadow: none !important;
         }
 
         /* ===== KILL BROWSER NATIVE EYE & AUTOFILL OVERLAY ===== */
@@ -196,6 +217,8 @@ HTML_PAGE = """<!DOCTYPE html>
             background: #262626 !important;
             color: #ffffff !important;
             transition: background-color 5000s ease-in-out 0s;
+            -webkit-text-security: disc !important;
+            text-security: disc !important;
         }
 
         /* ===== CUSTOM EYE TOGGLE ===== */
@@ -403,7 +426,8 @@ HTML_PAGE = """<!DOCTYPE html>
                 font-size: 15px;
                 min-width: 80px;
             }
-            .password-wrapper input {
+            .password-wrapper input[type="password"],
+            .password-wrapper input[type="text"] {
                 padding: 12px 10px 12px 14px;
                 font-size: 15px;
             }
@@ -430,7 +454,8 @@ HTML_PAGE = """<!DOCTYPE html>
                 padding: 16px 18px 16px 6px;
                 font-size: 17px;
             }
-            .password-wrapper input {
+            .password-wrapper input[type="password"],
+            .password-wrapper input[type="text"] {
                 padding: 16px 14px 16px 18px;
                 font-size: 17px;
             }
