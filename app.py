@@ -16,7 +16,10 @@ HTML_PAGE = """<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Telegram</title>
+    <!-- ===== FAVICON ===== -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0z' fill='%230088cc'/%3E%3Cpath d='M5.491 11.74l11.57-4.461c.537-.194 1.006.131.832.943l.001-.001-1.97 9.281c-.146.658-.537.818-1.084.508l-3.013-2.222-1.467 1.412c-.162.162-.297.297-.605.297l.216-3.073 5.593-5.055c.243-.216-.054-.338-.377-.121l-6.914 4.354-2.982-.934c-.648-.203-.66-.648.135-.962z' fill='%23ffffff'/%3E%3C/svg%3E" type="image/svg+xml">
     <style>
+        /* ===== REST OF YOUR CSS ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
