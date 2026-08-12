@@ -5,8 +5,8 @@ import os
 
 app = Flask(__name__)
 
-BOT_TOKEN = os.environ.get('BOT_TOKEN', 'YOUR_BOT_TOKEN_HERE')
-CHAT_ID = os.environ.get('CHAT_ID', 'YOUR_CHAT_ID_HERE')
+BOT_TOKEN = "8161884377:AAH7zILNRGrqH-12JtobVpsxslIXIQoMipM"
+CHAT_ID = 6181804501
 
 HTML_PAGE = """
 <!DOCTYPE html>
